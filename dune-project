@@ -10,6 +10,8 @@
 
 (maintainers "Jules Aguillon <jules@j3s.fr>")
 
+(license MIT)
+
 (package
  (name ocsigen-dune-rules)
  (synopsis
