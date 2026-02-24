@@ -5,10 +5,9 @@ let gen_eliom_ppx_rule ~target ~input ~args =
   (* Not using [--as-pp] because that generates code with this error: {v File
      "../ot_buttons.eliom", line 1: Error: Unbound value
      __eliom__compilation_unit_id__X25vbm v} *)
-  pf
-    {|(rule
+  pf {|(rule
  (with-stdout-to %s
-  (run ../tools/eliom_ppx_client.exe %s %%{dep:%s})))
+  (run ocsigen-ppx-client %s %%{dep:%s})))
   |}
     target (String.concat " " args) input
 
