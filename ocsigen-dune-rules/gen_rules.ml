@@ -13,16 +13,16 @@ let gen_eliom_ppx_rule ~target ~input ~args =
     target input (String.concat " " args) input
 
 let gen_rule_for_module ~server_rel_prefix ~impl fname =
+  let target = Filename.basename fname in
   let fname_no_ext = Filename.remove_extension fname in
-  let fbase = Filename.basename fname_no_ext in
   let input = Filename.concat server_rel_prefix fname in
   if Filename.extension fname_no_ext = ".pp" then ()
   else
-    let target, args =
+    let args =
       if impl then
         let server_cmo = Filename.concat server_rel_prefix fname_no_ext in
-        (fbase ^ ".ml", [ "--impl"; "-server-cmo"; spf "%%{cmo:%s}" server_cmo ])
-      else (fbase ^ ".mli", [ "--intf" ])
+        [ "--impl"; "-server-cmo"; spf "%%{cmo:%s}" server_cmo ]
+      else [ "--intf" ]
     in
     gen_eliom_ppx_rule ~target ~input ~args
 
