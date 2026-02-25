@@ -2,14 +2,15 @@ let pf = Printf.printf
 let spf = Printf.sprintf
 
 let gen_eliom_ppx_rule ~target ~input ~args =
-  (* Not using [--as-pp] because that generates code with this error: {v File
-     "../ot_buttons.eliom", line 1: Error: Unbound value
-     __eliom__compilation_unit_id__X25vbm v} *)
-  pf {|(rule
+  (* The [chdir] instruction is needed to obtain the correct path for
+     [-loc-filename] to be used in error messages. *)
+  pf
+    {|(rule
  (with-stdout-to %s
-  (run ocsigen-ppx-client %s %%{dep:%s})))
-  |}
-    target (String.concat " " args) input
+  (chdir %%{workspace_root}
+   (run ocsigen-ppx-client -as-pp -loc-filename %%{dep:%s} %s %%{dep:%s}))))
+|}
+    target input (String.concat " " args) input
 
 let gen_rule_for_module ~server_rel_prefix ~impl fname =
   let fname_no_ext = Filename.remove_extension fname in
