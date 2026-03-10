@@ -10,7 +10,7 @@ depends: [
   "ocaml"
   "cmdliner"
   "ocsigen-ppx-rpc"
-  "eliom"
+  "eliom" {>= "12.0.0"}
   "odoc" {with-doc}
 ]
 build: [

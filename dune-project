@@ -16,4 +16,9 @@
  (name ocsigen-dune-rules)
  (synopsis
   "Generate Dune rules for building a client/server application or library.")
- (depends ocaml cmdliner ocsigen-ppx-rpc eliom))
+ (depends
+  ocaml
+  cmdliner
+  ocsigen-ppx-rpc
+  (eliom
+   (>= "12.0.0"))))
