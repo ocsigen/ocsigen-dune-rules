@@ -1,5 +1,7 @@
 # ocsigen-dune-rules
 
+[![OCaml-CI Build Status](https://img.shields.io/endpoint?url=https://ocaml.ci.dev/badge/ocsigen/ocsigen-dune-rules/main&logo=ocaml)](https://ocaml.ci.dev/github/ocsigen/ocsigen-dune-rules)
+
 Generate Dune rules for building a client/server application or library.
 
 ## Usage
