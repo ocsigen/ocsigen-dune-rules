@@ -17,10 +17,7 @@ Place it in a directory containing `*.eliom` files.
  (modes byte native)
  (wrapped false)
  (preprocess
-  (pps
-   eliom.ppx.server
-   ocsigen-ppx-rpc
-   --rpc-raw))
+  (pps eliom.ppx.server ocsigen-ppx-rpc --rpc-raw))
  (libraries eliom.server js_of_ocaml))
 
 (subdir
@@ -42,7 +39,18 @@ Place it in a directory containing `*.eliom` files.
  (action
   (with-stdout-to
    dune.client
-   (run ocsigen-dune-rules .))))
+   (run ocsigen-dune-rules gen .))))
+
+(rule
+ (alias runtest)
+ (action
+  (run
+   ocsigen-dune-rules
+   check-modules
+   --client
+   %{dep:client/my_lib.bc}
+   --server
+   %{dep:my_lib.cma})))
 ```
 
 You must also tell Dune that `*.eliom` files contain source code by adding this to your `dune-project` file:

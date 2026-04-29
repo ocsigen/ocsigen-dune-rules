@@ -1,4 +1,4 @@
-  $ ocsigen-dune-rules .
+  $ ocsigen-dune-rules gen .
   (rule
    (with-stdout-to a.eliom
     (chdir %{workspace_root}
