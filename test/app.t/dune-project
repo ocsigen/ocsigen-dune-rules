@@ -1,5 +1,7 @@
 (lang dune 3.14)
 
+(using directory-targets 0.1)
+
 (dialect
  (name "eliom-server")
  (implementation

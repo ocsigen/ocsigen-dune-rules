@@ -1,11 +1,14 @@
 (executable
+ (public_name my_app)
  (name my_app)
+ (package my_app)
  (modes byte native)
  (preprocess
   (pps eliom.ppx.server ocsigen-ppx-rpc --rpc-raw))
  (libraries
   eliom.server
   ocsigenserver
+  ocsigenserver.ext.staticmod
   ocsipersist-sqlite
   js_of_ocaml
   my_lib.server))

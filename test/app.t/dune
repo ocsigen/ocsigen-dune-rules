@@ -1,0 +1,22 @@
+; To try this example application:
+;   cp -rT test/app.t test_app
+;   dune build --no-buffer @run_app
+
+(rule
+ (target
+  (dir dist))
+ (mode promote)
+ (action
+  (progn
+   (bash
+    "mkdir -p dist/{lib/my_app,var/{{log,data,www}/my_app,www/my_app/css,run}}")
+   (bash "cp %{dep:app/client/my_app.bc.js} dist/var/www/my_app/my_app.js")
+   ; To add a css file:
+   ; (bash "cp %{dep:static/css/my_app.css} dist/var/www/my_app/css/my_app.css")
+   )))
+
+(rule
+ (alias run_app)
+ (deps dist)
+ (action
+  (run my_app)))

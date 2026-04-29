@@ -25,6 +25,8 @@ let _main_service =
 let _ =
   Ocsigen_server.start
     ~ports:[ (`All, 8080) ]
-    ~command_pipe:"local/var/run/my_app" ~logdir:"local/var/log/my_app"
-    ~datadir:"local/var/data/my_app" ~default_charset:(Some "utf-8")
-    [ Ocsigen_server.host ~regexp:".*" [ Eliom.run () ] ]
+    ~default_charset:(Some "utf-8")
+    [
+      Ocsigen_server.host ~regexp:".*"
+        [ Staticmod.run ~dir:"dist/var/www/my_app" (); Eliom.run () ];
+    ]
