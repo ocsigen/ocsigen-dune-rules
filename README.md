@@ -40,7 +40,7 @@ Place it in a directory containing `*.eliom` files.
  (action
   (with-stdout-to
    dune.client
-   (run ocsigen-dune-rules .))))
+   (run ocsigen-dune-rules gen .))))
 ```
 
 You must also tell Dune that `*.eliom` files contain source code by adding this to your `dune-project` file:
