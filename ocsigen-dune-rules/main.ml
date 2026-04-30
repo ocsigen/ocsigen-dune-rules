@@ -1,12 +1,15 @@
 open Cmdliner
 
 module Gen = struct
-  let run internal_prefix subdir dir =
+  let run internal_prefix subdir server_objs_dir dir =
     (match internal_prefix with
     | Some p -> Gen_rules.extra_ppx_args := [ "-internal-prefix"; p ]
     | None -> ());
     (match subdir with
     | Some s -> Gen_rules.subdir_name := s
+    | None -> ());
+    (match server_objs_dir with
+    | Some d -> Gen_rules.server_objs_dir := d
     | None -> ());
     let files = Utils.list_dir dir in
     let files = List.filter (Fun.negate Utils.is_dir) files in
@@ -39,8 +42,31 @@ module Gen = struct
     in
     Arg.(value & opt (some string) None & info ~doc ~docv:"DIR" [ "subdir" ])
 
+  let arg_server_objs_dir =
+    let doc =
+      "Path to the server library's [.objs/byte/] directory, relative to \
+       the dune file containing the generated rules.  When set, emit \
+       explicit [%{dep:$(docv)/<prefix>__<Name>.cmo}] paths for \
+       [-server-cmo] instead of the [%{cmo:Name}] dune variable.  Needed \
+       when the client lib has a sister module of the same name as the \
+       server, in which case [%{cmo:Name}] resolves to the local (client) \
+       [.cmo] rather than the server's.  The [<prefix>__] is derived from \
+       [--subdir]."
+    in
+    Arg.(
+      value
+      & opt (some string) None
+      & info ~doc ~docv:"DIR" [ "server-objs-dir" ])
+
   let cmd =
-    let term = Term.(const run $ arg_internal_prefix $ arg_subdir $ arg_dir) in
+    let term =
+      Term.(
+        const run
+        $ arg_internal_prefix
+        $ arg_subdir
+        $ arg_server_objs_dir
+        $ arg_dir)
+    in
     let doc = "Generate dune rules to stdout." in
     let info = Cmd.info "gen" ~doc in
     Cmd.v info term
