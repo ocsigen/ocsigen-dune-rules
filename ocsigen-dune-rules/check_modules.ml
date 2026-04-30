@@ -1,92 +1,61 @@
-let modules_from_bytecode_executable nm =
-  let ch = Unix.open_process_in (Printf.sprintf "ocamlobjinfo %s" nm) in
-  while input_line ch <> "Imported units:" do
-    ()
-  done;
-  let lst = ref [] in
-  (try
-     while
-       let l = input_line ch in
-       if l <> "" && l.[0] = '\t' then (
-         let i = String.rindex l '\t' in
-         lst := String.sub l (i + 1) (String.length l - i - 1) :: !lst;
-         true)
-       else false
-     do
-       ()
-     done
-   with End_of_file -> ());
-  !lst
+(** Extract source file names from the [DBUG] section. See [Bytelink]. *)
+let extract_source_files toc ic =
+  let locs = ref [] in
+  let record_events _ evl =
+    List.iter
+      (fun (ev : Instruct.debug_event) ->
+        locs := ev.ev_loc.Location.loc_start.Lexing.pos_fname :: !locs)
+      evl
+  in
+  (* Code taken from [tools/dumpobj.ml]. *)
+  begin match Bytesections.seek_section toc ic Bytesections.Name.DBUG with
+  | exception Not_found -> ()
+  | (_ : int) ->
+      let num_eventlists = input_binary_int ic in
+      for _i = 1 to num_eventlists do
+        let orig = input_binary_int ic in
+        let evl = (input_value ic : Instruct.debug_event list) in
+        (* Skip the list of absolute directory names *)
+        ignore (input_value ic);
+        record_events orig evl
+      done
+  end;
+  !locs
 
-let modules_from_bytecode_library nm =
-  let ch = Unix.open_process_in (Printf.sprintf "ocamlobjinfo %s" nm) in
-  let lst = ref [] in
-  (try
-     while true do
-       let l = input_line ch in
-       if String.length l > 11 && String.sub l 0 11 = "Unit name: " then
-         lst := String.sub l 11 (String.length l - 11) :: !lst
-     done
-   with End_of_file -> ());
-  !lst
+(** Extract the list of source file names that were compiled to produce a
+    bytecode program. Requires that the program is compiled with [-g]. *)
+let source_files_in_bytecode path =
+  In_channel.with_open_bin path (fun ic ->
+      let toc = Bytesections.read_toc ic in
+      extract_source_files toc ic)
 
-let read_file f =
-  let ch = open_in f in
-  let s = really_input_string ch (in_channel_length ch) in
-  close_in ch;
-  s
+module S = Set.Make (String)
 
-let section_re = Str.regexp "close_\\(server\\|client\\)_section"
-
-let match_substring sub_re s =
-  try
-    ignore (Str.search_forward sub_re s 0);
-    true
-  with Not_found -> false
-
-let eliom_modules dir =
-  Sys.readdir dir |> Array.to_list |> List.sort compare
-  |> List.filter_map @@ fun nm ->
-     if Filename.check_suffix nm ".pp.eliom" then
-       let f = read_file (Filename.concat dir nm) in
-       Some
-         ( String.capitalize_ascii (Filename.chop_suffix nm ".pp.eliom"),
-           match_substring section_re f )
-     else None
-
-let print_modules side l =
-  Format.printf "[%%%%%s.start]@.@." side;
-  List.iter (fun m -> Format.printf "module %s = %s@." m m) l;
-  Format.printf "@."
+let eliom_modules path =
+  source_files_in_bytecode path
+  |> List.filter (fun f -> Filename.check_suffix f ".eliom")
+  |> S.of_list
 
 let run ~server_bytecode ~client_bytecode =
-  let client_modules = modules_from_bytecode_executable client_bytecode in
-  let server_modules = modules_from_bytecode_library server_bytecode in
-  let eliom_modules = eliom_modules "." in
+  let server_modules = eliom_modules server_bytecode in
+  let client_modules = eliom_modules client_bytecode in
   let missing_server_modules =
-    List.filter_map
-      (fun (m, sect) ->
-        let c = List.mem m client_modules in
-        let s = List.mem m server_modules in
-        match (c, s, sect) with true, false, true -> Some m | _ -> None)
-      eliom_modules
+    S.diff server_modules client_modules |> S.to_list
   in
   let missing_client_modules =
-    List.filter_map
-      (fun (m, sect) ->
-        let c = List.mem m client_modules in
-        let s = List.mem m server_modules in
-        match (c, s, sect) with false, true, true -> Some m | _ -> None)
-      eliom_modules
+    S.diff client_modules server_modules |> S.to_list
   in
   let missing_modules =
     missing_server_modules <> [] || missing_client_modules <> []
   in
-  if missing_modules then
-    Format.eprintf
-      "Some modules are missing (Add them to the entry point .eliom file):@.@.";
-  if missing_server_modules <> [] then
-    print_modules "server" missing_server_modules;
-  if missing_client_modules <> [] then
-    print_modules "client" missing_client_modules;
-  if missing_modules then exit 1
+  if missing_modules then (
+    Format.(
+      eprintf
+        "Some modules are missing. Make sure to build with [(library_flags \
+         (:standard -linkall))].@.@.@[<hv>Missing on the server:@ \
+         @[<hov>%a@]@]@.@[<hv>Missing on the client:@ @[<hov>%a@]@]@."
+        (pp_print_list pp_print_string)
+        missing_server_modules
+        (pp_print_list pp_print_string)
+        missing_client_modules);
+    exit 1)

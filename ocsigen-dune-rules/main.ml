@@ -23,16 +23,17 @@ module Check_modules = struct
 
   let arg_server =
     let doc =
-      "Path to the compiled bytecode for the server side. Usually APP_NAME.cma."
+      "Path to the bytecode executable for the server side. Usually \
+       APP_NAME.bc."
     in
     Arg.(
       required
       & opt (some string) None
-      & info ~doc ~docv:"APP_NAME.cma" [ "server" ])
+      & info ~doc ~docv:"APP_NAME.bc" [ "server" ])
 
   let arg_client =
     let doc =
-      "Path to the compiled bytecode for the client side. Usually \
+      "Path to the bytecode executable for the client side. Usually \
        client/APP_NAME.bc."
     in
     Arg.(
