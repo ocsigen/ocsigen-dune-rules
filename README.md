@@ -9,27 +9,29 @@ Generate Dune rules for building a client/server application or library.
 The following `dune` file builds the client and server parts of your library.
 Place it in a directory containing `*.eliom` files.
 
-`lib/dune`:
+`app/dune`:
 ```dune
-(library
- (public_name my_lib.server)
- (name my_lib)
+(executable
+ (name my_app)
  (modes byte native)
- (wrapped false)
  (preprocess
   (pps eliom.ppx.server ocsigen-ppx-rpc --rpc-raw))
- (libraries eliom.server js_of_ocaml))
+ (libraries
+  eliom.server
+  ocsigenserver
+  ocsipersist-sqlite
+  js_of_ocaml
+  my_lib.server))
 
 (subdir
  client
- (library
-  (public_name my_lib.client)
-  (name my_lib)
-  (modes byte)
-  (wrapped false)
+ (executable
+  (name my_app)
+  (modes js byte)
   (preprocess
    (pps eliom.ppx.client js_of_ocaml-ppx))
-  (libraries eliom.client js_of_ocaml js_of_ocaml-lwt))
+  (js_of_ocaml)
+  (libraries eliom.client js_of_ocaml js_of_ocaml-lwt my_lib.client))
  (dynamic_include ../dune.client))
 
 (rule
@@ -48,9 +50,9 @@ Place it in a directory containing `*.eliom` files.
    ocsigen-dune-rules
    check-modules
    --client
-   %{dep:client/my_lib.bc}
+   %{dep:client/my_app.bc}
    --server
-   %{dep:my_lib.cma})))
+   %{dep:my_app.bc})))
 ```
 
 You must also tell Dune that `*.eliom` files contain source code by adding this to your `dune-project` file:
@@ -65,4 +67,5 @@ You must also tell Dune that `*.eliom` files contain source code by adding this 
   (extension "eliomi")))
 ```
 
-See [ocsigen-toolkit](https://github.com/ocsigen/ocsigen-toolkit/tree/master) for a working example.
+See [`test/app.t`](test/app.t) for both application and library examples.
+See [ocsigen-toolkit](https://github.com/ocsigen/ocsigen-toolkit/tree/master) for a real world example.

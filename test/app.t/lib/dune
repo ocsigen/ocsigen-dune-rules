@@ -1,0 +1,31 @@
+(library
+ (public_name my_lib.server)
+ (name my_lib)
+ (modes byte native)
+ (wrapped false)
+ (preprocess
+  (pps eliom.ppx.server ocsigen-ppx-rpc --rpc-raw))
+ (libraries eliom.server js_of_ocaml))
+
+(subdir
+ client
+ (library
+  (public_name my_lib.client)
+  (name my_lib)
+  (modes byte)
+  (wrapped false)
+  (library_flags
+   (:standard -linkall))
+  (preprocess
+   (pps eliom.ppx.client js_of_ocaml-ppx))
+  (libraries eliom.client js_of_ocaml js_of_ocaml-lwt))
+ (dynamic_include ../dune.client))
+
+(rule
+ (deps
+  (glob_files *.eliom)
+  (glob_files *.eliomi))
+ (action
+  (with-stdout-to
+   dune.client
+   (run ocsigen-dune-rules gen .))))

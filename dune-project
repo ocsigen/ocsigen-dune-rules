@@ -15,10 +15,15 @@
 (package
  (name ocsigen-dune-rules)
  (synopsis
-  "Generate Dune rules for building a client/server application or library.")
+  "Generate Dune rules for building a client/server application or library")
  (depends
   ocaml
   cmdliner
   ocsigen-ppx-rpc
   (eliom
-   (>= "12.0.0"))))
+   (>= "12.0.0"))
+  (ocsigenserver :with-test)
+  (ocsipersist-sqlite :with-test)
+  (js_of_ocaml :with-test)
+  (js_of_ocaml-lwt :with-test)
+  (js_of_ocaml-ppx :with-test)))

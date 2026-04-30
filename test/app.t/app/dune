@@ -1,0 +1,45 @@
+(executable
+ (public_name my_app)
+ (name my_app)
+ (package my_app)
+ (modes byte native)
+ (preprocess
+  (pps eliom.ppx.server ocsigen-ppx-rpc --rpc-raw))
+ (libraries
+  eliom.server
+  ocsigenserver
+  ocsigenserver.ext.staticmod
+  ocsipersist-sqlite
+  js_of_ocaml
+  my_lib.server))
+
+(subdir
+ client
+ (executable
+  (name my_app)
+  (modes js byte)
+  (preprocess
+   (pps eliom.ppx.client js_of_ocaml-ppx))
+  (js_of_ocaml)
+  (libraries eliom.client js_of_ocaml js_of_ocaml-lwt my_lib.client))
+ (dynamic_include ../dune.client))
+
+(rule
+ (deps
+  (glob_files *.eliom)
+  (glob_files *.eliomi))
+ (action
+  (with-stdout-to
+   dune.client
+   (run ocsigen-dune-rules gen .))))
+
+(rule
+ (alias runtest)
+ (action
+  (run
+   ocsigen-dune-rules
+   check-modules
+   --client
+   %{dep:client/my_app.bc}
+   --server
+   %{dep:my_app.bc})))
