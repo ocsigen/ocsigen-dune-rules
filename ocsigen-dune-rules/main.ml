@@ -1,9 +1,12 @@
 open Cmdliner
 
 module Gen = struct
-  let run internal_prefix dir =
+  let run internal_prefix subdir dir =
     (match internal_prefix with
     | Some p -> Gen_rules.extra_ppx_args := [ "-internal-prefix"; p ]
+    | None -> ());
+    (match subdir with
+    | Some s -> Gen_rules.subdir_name := s
     | None -> ());
     let files = Utils.list_dir dir in
     let files = List.filter (Fun.negate Utils.is_dir) files in
@@ -27,8 +30,17 @@ module Gen = struct
       & opt (some string) None
       & info ~doc ~docv:"PREFIX" [ "internal-prefix" ])
 
+  let arg_subdir =
+    let doc =
+      "Wrap the generated rules in a [(subdir $(docv) ...)] stanza so the \
+       preprocessed files land in [$(docv)/].  Used together with \
+       [(include_subdirs qualified)] to expose the modules under a \
+       [$(docv).] namespace."
+    in
+    Arg.(value & opt (some string) None & info ~doc ~docv:"DIR" [ "subdir" ])
+
   let cmd =
-    let term = Term.(const run $ arg_internal_prefix $ arg_dir) in
+    let term = Term.(const run $ arg_internal_prefix $ arg_subdir $ arg_dir) in
     let doc = "Generate dune rules to stdout." in
     let info = Cmd.info "gen" ~doc in
     Cmd.v info term
