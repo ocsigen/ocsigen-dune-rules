@@ -1,3 +1,6 @@
+let pp_string_list =
+  Format.(pp_print_list ~pp_sep:pp_print_space pp_print_string)
+
 (** Extract source file names from the [DBUG] section. See [Bytelink]. *)
 let extract_source_files toc ic =
   let locs = ref [] in
@@ -54,8 +57,6 @@ let run ~server_bytecode ~client_bytecode =
         "Some modules are missing. Make sure to build with [(library_flags \
          (:standard -linkall))].@.@.@[<hv>Missing on the server:@ \
          @[<hov>%a@]@]@.@[<hv>Missing on the client:@ @[<hov>%a@]@]@."
-        (pp_print_list pp_print_string)
-        missing_server_modules
-        (pp_print_list pp_print_string)
+        pp_string_list missing_server_modules pp_string_list
         missing_client_modules);
     exit 1)
