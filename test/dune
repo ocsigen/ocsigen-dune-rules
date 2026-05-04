@@ -1,2 +1,2 @@
 (cram
- (deps %{bin:ocsigen-dune-rules}))
+ (deps %{bin:ocsigen-dune-rules} %{bin:ocsigen-ppx-client}))
