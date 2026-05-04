@@ -22,14 +22,7 @@
    (pps eliom.ppx.client js_of_ocaml-ppx))
   (js_of_ocaml
    (build_runtime_flags :standard --enable use-js-string)
-   (flags
-    :standard
-    --enable
-    with-js-error
-    --enable
-    use-js-string
-    --no-source-map))
-  ; source maps are slow...
+   (flags :standard --enable with-js-error --enable use-js-string))
   (libraries eliom.client js_of_ocaml js_of_ocaml-lwt my_lib.client))
  (dynamic_include ../dune.client))
 
