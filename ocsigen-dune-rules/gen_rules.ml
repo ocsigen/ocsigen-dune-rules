@@ -1,16 +1,78 @@
 let pf = Printf.printf
 let spf = Printf.sprintf
 
+(** Extra arguments to pass to [ocsigen-ppx-client] for every rule.
+    Currently used by [--internal-prefix]. *)
+let extra_ppx_args = ref []
+
+(** When non-empty, wrap generated rules in a [(subdir DIR ...)] stanza
+    so the preprocessed files land in [DIR/].  Used together with
+    [(include_subdirs qualified)]. *)
+let subdir_name = ref ""
+
+(** When non-empty, emit explicit [%{dep:DIR/<prefix>__<Name>.cmo}]
+    paths for [-server-cmo] instead of the [%{cmo:Name}] dune
+    variable.  Needed when the client lib has a sister module of the
+    same name as the server, in which case [%{cmo:Name}] resolves to
+    the local (client) [.cmo] rather than the server's. *)
+let server_objs_dir = ref ""
+
 let gen_eliom_ppx_rule ~target ~input ~args =
   (* The [chdir] instruction is needed to obtain the correct path for
      [-loc-filename] to be used in error messages. *)
-  pf
-    {|(rule
+  let all_args = !extra_ppx_args @ args in
+  if !subdir_name <> ""
+  then
+    pf
+      {|(subdir %s
+ (rule
+  (with-stdout-to %s
+   (chdir %%{workspace_root}
+    (run ocsigen-ppx-client -as-pp -loc-filename %%{dep:%s} %s %%{dep:%s})))))
+|}
+      !subdir_name (Filename.basename target) input
+      (String.concat " " all_args)
+      input
+  else
+    pf
+      {|(rule
  (with-stdout-to %s
   (chdir %%{workspace_root}
    (run ocsigen-ppx-client -as-pp -loc-filename %%{dep:%s} %s %%{dep:%s}))))
 |}
-    target input (String.concat " " args) input
+      target input (String.concat " " all_args) input
+
+(** Compute the [-server-cmo] argument for a given module file.
+
+    Default: rely on the [%{cmo:...}] dune variable to find the server
+    [.cmo] in the current library.
+
+    With [--server-objs-dir DIR]: build an explicit [%{dep:...}] path
+    pointing at [DIR/<prefix>__<Name>.cmo], where [<prefix>__] is
+    derived from [--subdir] (the lowercase of the subdir name plus
+    [__], to match dune's own wrapping convention).  This avoids the
+    ambiguity of [%{cmo:Name}] when client and server libs both have a
+    [Name] module. *)
+let server_cmo_arg ~server_rel_prefix ~fname_no_ext =
+  if !server_objs_dir <> ""
+  then
+    let module_base = Filename.basename fname_no_ext in
+    let cap_name = String.capitalize_ascii module_base in
+    let prefix =
+      if !subdir_name <> ""
+      then String.lowercase_ascii !subdir_name ^ "__"
+      else ""
+    in
+    let cmo_from_dune_dir =
+      spf "%s/%s%s.cmo" !server_objs_dir prefix cap_name
+    in
+    let cmo_path =
+      if !subdir_name <> "" then spf "../%s" cmo_from_dune_dir else cmo_from_dune_dir
+    in
+    spf "%%{dep:%s}" cmo_path
+  else
+    let server_cmo = Filename.concat server_rel_prefix fname_no_ext in
+    spf "%%{cmo:%s}" server_cmo
 
 let gen_rule_for_module ~server_rel_prefix ~impl fname =
   let target = Filename.basename fname in
@@ -20,8 +82,8 @@ let gen_rule_for_module ~server_rel_prefix ~impl fname =
   else
     let args =
       if impl then
-        let server_cmo = Filename.concat server_rel_prefix fname_no_ext in
-        [ "--impl"; "-server-cmo"; spf "%%{cmo:%s}" server_cmo ]
+        let server_cmo = server_cmo_arg ~server_rel_prefix ~fname_no_ext in
+        [ "--impl"; "-server-cmo"; server_cmo ]
       else [ "--intf" ]
     in
     gen_eliom_ppx_rule ~target ~input ~args
