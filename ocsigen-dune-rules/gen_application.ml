@@ -86,6 +86,6 @@ let run name libraries preprocess wasm dune_file public_name =
       server_executable_stanza ~public_name ~name ~libraries ~preprocess;
       client_subdir_stanza ~name ~libraries ~wasm;
     ]
-  @ Gen_utils.gen_client_modules_stanzas preprocess
+  @ Gen_utils.gen_client_modules_stanzas ~name ~wrapped:false preprocess
   @ check_modules_rules ~name
   |> pp_list Format.std_formatter

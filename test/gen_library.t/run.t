@@ -113,6 +113,7 @@ Warns when passing a default library or preprocessor:
 
 --wrapped true generates an error for now.
 
-  $ ocsigen-dune-rules gen-library --wrapped true my_lib
-  Error: Wrapped libraries are not supported.
-  [1]
+  $ ocsigen-dune-rules gen-library --wrapped true my_lib | grep wrapped
+     --wrapped
+   (wrapped true)
+    (wrapped true)

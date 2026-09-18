@@ -96,9 +96,20 @@ let ppx_client_stanza preprocess =
 
 (** Stanzas building the client modules: the PPX driver and the rule generating
     the [dune.client] file, which contains a rule per module. *)
-let gen_client_modules_stanzas preprocess =
+let gen_client_modules_stanzas ~name ~wrapped preprocess =
   let ppx_args =
     match preprocess.pps_client_args with [] -> [] | args -> "--" :: args
+  and wrapped_args =
+    (* gen-client-modules needs to construct wrapped names and to locate the
+       server library objects. *)
+    if wrapped then
+      [
+        "--internal-prefix";
+        name;
+        "--server-objs-dir";
+        Printf.sprintf "../.%s.objs/byte" name;
+      ]
+    else []
   in
   [
     ppx_client_stanza preprocess;
@@ -116,8 +127,8 @@ let gen_client_modules_stanzas preprocess =
                 atom "dune.client";
                 field "run"
                   (atoms
-                     ([ "ocsigen-dune-rules"; "gen-client-modules"; "." ]
-                     @ ppx_args));
+                     ([ "ocsigen-dune-rules"; "gen-client-modules" ]
+                     @ wrapped_args @ [ "." ] @ ppx_args));
               ];
           ];
       ];

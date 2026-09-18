@@ -1,7 +1,7 @@
 To update this test, run these two bash commands:
 
 dune exec -- ocsigen-dune-rules gen-application --server-libraries ocsipersist-sqlite,ocsigenserver.ext.staticmod --eliom-libraries my_lib my_app > test/app.t/app/dune
-dune exec -- ocsigen-dune-rules gen-library --wrapped false my_lib > test/app.t/lib/dune
+dune exec -- ocsigen-dune-rules gen-library --wrapped true my_lib > test/app.t/lib/dune
 
   $ dune build --profile release
 

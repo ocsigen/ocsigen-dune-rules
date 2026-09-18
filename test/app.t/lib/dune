@@ -5,7 +5,7 @@
    ocsigen-dune-rules
    gen-library
    --wrapped
-   false
+   true
    my_lib
    --dune
    %{dep:dune})))
@@ -28,7 +28,7 @@
  (public_name my_lib.server)
  (name my_lib)
  (modes byte native)
- (wrapped false)
+ (wrapped true)
  (library_flags
   (:standard -linkall))
  (preprocess
@@ -45,7 +45,7 @@
   (public_name my_lib.client)
   (name my_lib)
   (modes byte)
-  (wrapped false)
+  (wrapped true)
   (library_flags
    (:standard -linkall))
   (libraries eliom.client js_of_ocaml js_of_ocaml-lwt))
@@ -71,4 +71,13 @@
  (action
   (with-stdout-to
    dune.client
-   (run ocsigen-dune-rules gen-client-modules . -- --rpc-raw))))
+   (run
+    ocsigen-dune-rules
+    gen-client-modules
+    --internal-prefix
+    my_lib
+    --server-objs-dir
+    ../.my_lib.objs/byte
+    .
+    --
+    --rpc-raw))))

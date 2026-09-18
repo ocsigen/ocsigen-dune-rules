@@ -57,8 +57,6 @@ every rule.
       -as-pp
       -loc-filename
       %{dep:../a.eliom}
-      -internal-prefix
-      Os
       --impl
       -server-cmo
       %{cmo:../a}
@@ -74,8 +72,6 @@ every rule.
       -as-pp
       -loc-filename
       %{dep:../b.eliom}
-      -internal-prefix
-      Os
       --impl
       -server-cmo
       %{cmo:../b}
@@ -91,11 +87,8 @@ every rule.
       -as-pp
       -loc-filename
       %{dep:../b.eliomi}
-      -internal-prefix
-      Os
       --intf
       %{dep:../b.eliomi}))))
-
 --subdir DIR wraps each generated rule in a (subdir DIR ...) stanza
 so the preprocessed files land in DIR/.  The input paths still refer
 to the original location relative to the workspace root, thanks to

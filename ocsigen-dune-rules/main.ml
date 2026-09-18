@@ -58,30 +58,17 @@ let opt_dune =
 
 module Gen_client_modules = struct
   let run internal_prefix subdir server_objs_dir dir ppx_args =
-    let internal_prefix_args =
-      match internal_prefix with
-      | Some p -> [ "-internal-prefix"; p ]
-      | None -> []
-    in
-    let extra_ppx_args = internal_prefix_args @ ppx_args in
     let files = Utils.list_dir dir in
     let files = List.filter (Fun.negate Utils.is_dir) files in
-    Gen_client_modules.run ~extra_ppx_args ?subdir_name:subdir ?server_objs_dir
-      files
+    Gen_client_modules.run ~extra_ppx_args:ppx_args ?internal_prefix
+      ?subdir_name:subdir ?server_objs_dir files
 
   let arg_dir =
     let doc = "Directory containing the Eliom modules." in
     Arg.(required & pos 0 (some dir) None & info ~doc ~docv:"DIR" [])
 
   let arg_internal_prefix =
-    let doc =
-      "Pass [-internal-prefix $(docv)] to the client PPX driver.  Tells the \
-       client PPX to strip the [$(docv)__] wrapper prefix from the type paths \
-       it reads in the server [.cmo] files, so that the generated client code \
-       references the user-visible names instead of the internal ones.  \
-       Required when compiling a wrapped library whose [%client] blocks refer \
-       to its own modules (e.g. ocsigen-start)."
-    in
+    let doc = "Wrapped library prefix ([PREFIX__Module_name])." in
     Arg.(
       value
       & opt (some string) None
@@ -104,7 +91,8 @@ module Gen_client_modules = struct
        of the [%{cmo:Name}] dune variable.  Needed when the client lib has a \
        sister module of the same name as the server, in which case \
        [%{cmo:Name}] resolves to the local (client) [.cmo] rather than the \
-       server's.  The [<prefix>__] is derived from [--subdir]."
+       server's.  The [<prefix>__] is derived from [--internal-prefix] when \
+       set, otherwise from [--subdir]."
     in
     Arg.(
       value
@@ -143,7 +131,7 @@ module Gen_library = struct
 
   let opt_wrapped =
     let doc = "Control the (wrapped) field of the (library) stanza." in
-    Arg.(required & opt (some bool) None & info ~doc ~docv:"BOOL" [ "wrapped" ])
+    Arg.(value & opt bool true & info ~doc ~docv:"BOOL" [ "wrapped" ])
 
   let cmd =
     let term =

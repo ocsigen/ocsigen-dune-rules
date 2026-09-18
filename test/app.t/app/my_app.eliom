@@ -14,7 +14,7 @@ let _main_service =
       F.(
         html
           (head (title (txt "my_app")) [])
-          (body [ My_lib.counter_element ~init_value:42 ]))
+          (body [ My_lib.Counter.counter_element ~init_value:42 ]))
   in
   let service =
     Eliom_service.create ~path:(Eliom_service.Path [])
