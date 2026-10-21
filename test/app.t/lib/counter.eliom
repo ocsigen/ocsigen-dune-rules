@@ -1,4 +1,4 @@
-open%shared Eliom_content.Html
+open%shared Eliom.Content.Html
 open%client Js_of_ocaml
 open%client Js_of_ocaml_lwt
 

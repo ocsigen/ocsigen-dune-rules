@@ -15,8 +15,8 @@ ocsigen-dune-rules gen-application my_app \
   --eliom-libraries ocsigen-toolkit > app/dune
 ```
 
-The libraries are provided as an example. Change `app/dune` if your application
-code is not in `app/`.
+See [`test/app.t`](test/app.t) for a full example of a library and an
+application.
 
 To update the generated rules later, modify the `ocsigen-dune-rules` command in
 the generated `dune` file and run `dune runtest --auto-promote`.
@@ -34,5 +34,4 @@ to your `dune-project` file:
   (extension "eliomi")))
 ```
 
-See [`test/app.t`](test/app.t) for both application and library examples.
 See [ocsigen-toolkit](https://github.com/ocsigen/ocsigen-toolkit/tree/master) for a real world example.
