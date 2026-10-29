@@ -5,13 +5,15 @@ synopsis:
 maintainer: ["Jules Aguillon <jules@j3s.fr>"]
 authors: ["Jules Aguillon <jules@j3s.fr>"]
 license: "MIT"
+homepage: "https://github.com/ocsigen/ocsigen-dune-rules"
+bug-reports: "https://github.com/ocsigen/ocsigen-dune-rules/issues"
 depends: [
   "dune" {>= "3.14"}
   "ocaml" {>= "4.14"}
   "cmdliner"
   "ocsigen-ppx-rpc"
   "js_of_ocaml-ppx_deriving_json"
-  "eliom" {>= "13.0.0"}
+  "eliom" {>= "13.0~"}
   "ocsigenserver" {with-test}
   "ocsipersist-sqlite" {with-test}
   "js_of_ocaml" {with-test}
@@ -34,3 +36,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
+dev-repo: "git+https://github.com/ocsigen/ocsigen-dune-rules.git"
