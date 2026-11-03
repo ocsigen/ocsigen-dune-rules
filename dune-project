@@ -1,4 +1,4 @@
-(lang dune 3.14)
+(lang dune 3.20)
 
 (name ocsigen-dune-rules)
 
@@ -20,6 +20,8 @@
  (synopsis
   "Generate Dune rules for building a client/server application or library")
  (depends
+  (dune
+   (>= "3.20.1"))
   (ocaml
    (>= "4.14"))
   cmdliner
