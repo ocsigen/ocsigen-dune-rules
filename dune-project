@@ -26,7 +26,7 @@
   ocsigen-ppx-rpc
   js_of_ocaml-ppx_deriving_json
   (eliom
-   (>= "13.0~"))
+   (>= "13.0.0"))
   (ocsigenserver :with-test)
   (ocsipersist-sqlite :with-test)
   (js_of_ocaml :with-test)
