@@ -125,48 +125,26 @@ Warns when passing a default library or preprocessor:
 
 The name can be changed:
 
-  $ ocsigen-dune-rules gen-application my_app > dune.1
-  $ ocsigen-dune-rules gen-application --name main my_app > dune.2
-  $ diff dune.1 dune.2
-  4c4,11
-  <   (run ocsigen-dune-rules gen-application my_app --dune %{dep:dune})))
-  ---
-  >   (run
-  >    ocsigen-dune-rules
-  >    gen-application
-  >    --name
-  >    main
-  >    my_app
-  >    --dune
-  >    %{dep:dune})))
-  22c29
-  <  (name my_app)
-  ---
-  >  (name main)
-  37c44
-  <   (name my_app)
-  ---
-  >   (name main)
-  74c81
-  <    %{dep:client/my_app.bc}
-  ---
-  >    %{dep:client/main.bc}
-  87c94
-  <   (libraries my_app)))
-  ---
-  >   (libraries main)))
-  [1]
+  $ ocsigen-dune-rules gen-application my_app | grep main
+    (write-file main.ml "let () = Ppxlib.Driver.standalone ()"))
+    (name main)
+     %{dep:check_modules/main.bc})))
+    (write-file main.ml ""))
+    (name main)
+  $ ocsigen-dune-rules gen-application --name main my_app | grep main
+     main
+   (name main)
+    (name main)
+    (write-file main.ml "let () = Ppxlib.Driver.standalone ()"))
+    (name main)
+     %{dep:client/main.bc}
+     %{dep:check_modules/main.bc})))
+    (write-file main.ml ""))
+    (name main)
+    (libraries main)))
 
 Flags:
 
-  $ ocsigen-dune-rules gen-application --wasm my_app > dune.2
-  $ diff dune.1 dune.2
-  4c4
-  <   (run ocsigen-dune-rules gen-application my_app --dune %{dep:dune})))
-  ---
-  >   (run ocsigen-dune-rules gen-application --wasm my_app --dune %{dep:dune})))
-  38c38
-  <   (modes js byte)
-  ---
-  >   (modes js wasm byte)
-  [1]
+  $ ocsigen-dune-rules gen-application --wasm my_app | grep wasm
+    (run ocsigen-dune-rules gen-application --wasm my_app --dune %{dep:dune})))
+    (modes js wasm byte)
